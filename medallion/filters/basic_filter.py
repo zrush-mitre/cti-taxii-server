@@ -181,7 +181,21 @@ class BasicFilter(object):
 
         return match_objects
 
+    @staticmethod
+    def filter_by_source_ref(data, source_ref_):
+        source_ref_ = source_ref_.split(",")
+        match_objects = []
+
+        for obj in data:
+            if "source_ref" in obj and any(s == obj["source_ref"] for s in source_ref_):
+                match_objects.append(obj)
+
+        return match_objects
+
     def process_filter(self, data, allowed, manifest_info, limit):
+        #ais filters
+        filtered_by_source_ref = []
+        
         filtered_by_type = []
         filtered_by_id = []
         filtered_by_spec_version = []
@@ -204,12 +218,19 @@ class BasicFilter(object):
         else:
             filtered_by_id = filtered_by_type
 
+        # ais proposed filters
+        match_source_ref = self.filter_args.get("match[source_ref]")
+        if match_source_ref and "source_ref" in allowed:
+            filtered_by_source_ref = self.filter_by_source_ref(filtered_by_id, match_source_ref)
+        else:
+            filtered_by_source_ref = filtered_by_id
+        
         # match for spec_version
         match_spec_version = self.filter_args.get("match[spec_version]")
         if match_spec_version and "spec_version" in allowed:
-            filtered_by_spec_version = self.filter_by_spec_version(filtered_by_id, match_spec_version)
+            filtered_by_spec_version = self.filter_by_spec_version(filtered_by_source_ref, match_spec_version)
         else:
-            filtered_by_spec_version = filtered_by_id
+            filtered_by_spec_version = filtered_by_source_ref
 
         # match for added_after
         added_after_date = self.filter_args.get("added_after")
