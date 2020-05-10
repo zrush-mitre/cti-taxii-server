@@ -113,7 +113,7 @@ def get_or_add_objects(api_root, collection_id):
         permission_to_read(api_root, collection_id)
         limit = validate_limit_parameter()
         objects, headers = current_app.medallion_backend.get_objects(
-            api_root, collection_id, request.args.to_dict(), ("id", "type", "version", "spec_version"), limit
+            api_root, collection_id, request.args.to_dict(), ("id", "type", "version", "spec_version", "source_ref"), limit
         )
 
         return Response(
