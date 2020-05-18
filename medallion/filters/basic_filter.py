@@ -182,18 +182,45 @@ class BasicFilter(object):
         return match_objects
 
     @staticmethod
-    def filter_by_source_ref(data, source_ref_):
-        source_ref_ = source_ref_.split(",")
+    def filter_by_anything(data, filter_, subject):
+        tlps = {
+            "white": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9", 
+            "green": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da", 
+            "amber": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82", 
+            "red": "marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed"
+        }
+        filter_ = filter_.split(",")
         match_objects = []
 
         for obj in data:
-            if "source_ref" in obj and any(s == obj["source_ref"] for s in source_ref_):
-                match_objects.append(obj)
+            if subject in obj:
+                if type(obj[subject]) is str:
+                    if any(f == obj[subject] for f in filter_):
+                        match_objects.append(obj)
+                elif type(obj[subject]) is list:
+                    if any(any(f == x for x in obj[subject]) for f in filter_):
+                        match_objects.append(obj)
+                elif type(obj[subject]) is int:
+                    if any(int(f) == obj[subject] for f in filter_):
+                        match_objects.append(obj)
+            elif subject == "tlp" and "object_marking_refs" in obj:
+                if any(tlps[f] in obj["object_marking_refs"] for f in filter_):
+                    match_objects.append(obj)
+            elif "external_references" in obj:
+                for e in obj["external_references"]:
+                    if subject in e:
+                        if any(f == e[subject] for f in filter_):
+                            match_objects.append(obj)
 
         return match_objects
 
     def process_filter(self, data, allowed, manifest_info, limit):
         #ais filters
+        ais_filters = ["source_ref", "target_ref", "relationship_type", 
+                       "sighting_of_ref", "object_marking_refs", "tlp",
+                       "external_id", "source_name", "created_by_ref", 
+                       "confidence", "sectors", "labels", "object_refs",
+                       "value"]
         filtered_by_source_ref = []
         
         filtered_by_type = []
@@ -205,12 +232,20 @@ class BasicFilter(object):
         save_next = []
         headers = {}
 
+        # ais proposed filters
+        filtered_by_ais_filter = copy.deepcopy(data)
+        if "ais" in allowed:
+            for fil in ais_filters:
+                match_ais = self.filter_args.get("match[" + fil + "]")
+                if match_ais is not None:
+                    filtered_by_ais_filter = self.filter_by_anything(filtered_by_ais_filter, match_ais, fil)
+        
         # match for type and id filters first
         match_type = self.filter_args.get("match[type]")
         if match_type and "type" in allowed:
-            filtered_by_type = self.filter_by_type(data, match_type)
+            filtered_by_type = self.filter_by_type(filtered_by_ais_filter, match_type)
         else:
-            filtered_by_type = copy.deepcopy(data)
+            filtered_by_type = filtered_by_ais_filter
 
         match_id = self.filter_args.get("match[id]")
         if match_id and "id" in allowed:
@@ -218,19 +253,12 @@ class BasicFilter(object):
         else:
             filtered_by_id = filtered_by_type
 
-        # ais proposed filters
-        match_source_ref = self.filter_args.get("match[source_ref]")
-        if match_source_ref and "source_ref" in allowed:
-            filtered_by_source_ref = self.filter_by_source_ref(filtered_by_id, match_source_ref)
-        else:
-            filtered_by_source_ref = filtered_by_id
-        
         # match for spec_version
         match_spec_version = self.filter_args.get("match[spec_version]")
         if match_spec_version and "spec_version" in allowed:
-            filtered_by_spec_version = self.filter_by_spec_version(filtered_by_source_ref, match_spec_version)
+            filtered_by_spec_version = self.filter_by_spec_version(filtered_by_id, match_spec_version)
         else:
-            filtered_by_spec_version = filtered_by_source_ref
+            filtered_by_spec_version = filtered_by_id
 
         # match for added_after
         added_after_date = self.filter_args.get("added_after")
