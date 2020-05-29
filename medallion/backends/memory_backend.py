@@ -19,6 +19,8 @@ def remove_hidden_field(objs):
     for obj in objs:
         if "_date_added" in obj:
             del obj["_date_added"]
+        if "_manifest_pointer" in obj:
+            del obj["_manifest_pointer"]
 
 
 def find_headers(headers, manifest, obj):
@@ -38,13 +40,27 @@ class MemoryBackend(Backend):
     def __init__(self, **kwargs):
         if kwargs.get("filename"):
             self.load_data_from_file(kwargs.get("filename"))
+            self.data_initialization()
         else:
             self.data = {}
+        
         self.next = {}
         self.timeout = kwargs.get("session_timeout", 30)
 
         checker = SessionChecker(kwargs.get("check_interval", 10), self._pop_expired_sessions)
         checker.start()
+
+    def data_initialization(self):
+        for root in self.data:
+            if 'collections' in self.data[root]:
+                for coll in self.data[root]['collections']:
+                    if 'objects' in coll:
+                        for obj in coll['objects']:
+                            for man in coll['manifest']:
+                                if obj['id'] == man['id'] and find_att(obj) == find_att(man):
+                                    obj['_manifest_pointer'] = man
+                                    break
+
 
     def set_next(self, objects, args):
         u = str(uuid.uuid4())
@@ -142,19 +158,19 @@ class MemoryBackend(Backend):
                 media_type = media_type_fmt.format(determine_spec_version(new_obj))
 
                 # version is a single value now, therefore a new manifest is always created
-                collection["manifest"].append(
-                    {
+                manifest = {
                         "id": new_obj["id"],
                         "date_added": request_time,
                         "version": version,
                         "media_type": media_type,
-                    },
-                )
+                }
+                collection["manifest"].append(manifest)
 
                 # if the media type is new, attach it to the collection
                 if media_type not in collection["media_types"]:
                     collection["media_types"].append(media_type)
 
+                new_obj["_manifest_pointer"] = manifest
                 # quit once you have found the collection that needed updating
                 break
 

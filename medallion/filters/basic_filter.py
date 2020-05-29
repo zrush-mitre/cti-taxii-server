@@ -54,6 +54,7 @@ class BasicFilter(object):
         if len(data) == 0:
             return new, next_save, headers
         if manifest:
+            """
             manifest.sort(key=lambda x: x['date_added'])
             for man in manifest:
                 man_time = find_att(man)
@@ -72,6 +73,14 @@ class BasicFilter(object):
                 new = new[:limit]
             else:
                 headers["X-TAXII-Date-Added-Last"] = temp["date_added"]
+        """
+            data.sort(key=lambda x: x['_manifest_pointer']['date_added'])
+            if limit and limit < len(data):
+                next_save = data[limit:]
+                data = data[:limit]
+            headers["X-TAXII-Date-Added-First"] = data[0]['_manifest_pointer']["date_added"]
+            headers["X-TAXII-Date-Added-Last"] = data[-1]['_manifest_pointer']["date_added"]
+            new = data
         else:
             data.sort(key=lambda x: x['date_added'])
             if limit and limit < len(data):
@@ -98,6 +107,19 @@ class BasicFilter(object):
     def filter_by_added_after(data, manifest_info, added_after_date):
         added_after_timestamp = string_to_datetime(added_after_date)
         new_results = []
+        if manifest_info is None:
+            for obj in data:
+                if string_to_datetime(obj["date_added"]) > added_after_timestamp:
+                    new_results.append(obj)
+        # for other objects with manifests
+        else:
+            for obj in data:
+                if string_to_datetime(obj["_manifest_pointer"]["date_added"]) > added_after_timestamp:
+                    new_results.append(obj)
+        return new_results
+        
+        """added_after_timestamp = string_to_datetime(added_after_date)
+        new_results = []
         # for manifest objects and versions
         if manifest_info is None:
             for obj in data:
@@ -113,6 +135,7 @@ class BasicFilter(object):
                         new_results.append(obj)
                         break
         return new_results
+        """
 
     @staticmethod
     def filter_by_version(data, version):
@@ -120,6 +143,7 @@ class BasicFilter(object):
         final_match = []
         # final_track is a sorted list of id's
         final_track = []
+        mid_match = []
 
         # return most recent object versions unless otherwise specified
         if version is None:
@@ -130,9 +154,15 @@ class BasicFilter(object):
             # if "all" is in the list, just return everything
             return data
 
+        data.sort(key=lambda x: x['id'])
+        
         actual_dates = [string_to_datetime(x) for x in version_indicators if x != "first" and x != "last"]
         # if a specific version is given, filter for objects with that value
         if actual_dates:
+            for obj in data:
+                if any(find_att(obj) == date for date in actual_dates):
+                    mid_match.append(obj)
+            """
             id_track = []
             res = []
             for obj in data:
@@ -143,15 +173,49 @@ class BasicFilter(object):
                     res.insert(pos, obj)
             final_match = res
             final_track = id_track
+            """
 
         if "first" in version_indicators:
-            res = check_version(data, operator.lt)
-            check_for_dupes(final_match, final_track, res)
+            pass
+            #res = check_version(data, operator.lt)
+            #check_for_dupes(final_match, final_track, res)
 
         if "last" in version_indicators:
-            res = check_version(data, operator.gt)
-            check_for_dupes(final_match, final_track, res)
+            same = []
+            x = 0
+            for x in range(0, len(data)):
+                if not same or same[0]['id'] == data[x]['id']:
+                    same.append(data[x])
+                else:
+                    same.sort(key=lambda z: find_att(z))
+                    mid_match.append(same[-1])
+                    same = []
+                    same.append(data[x])
+            else:
+                same.sort(key=lambda z: find_att(z))
+                mid_match.append(same[-1])
+            #res = check_version(data, operator.gt)
+            #check_for_dupes(final_match, final_track, res)
 
+        mid_match.sort(key=lambda z: z['id']))
+
+        same = []
+        x = 0
+        for x in range(0, len(mid_match)):
+            if not same or same[0]['id'] == mid_match[x]['id']:
+                same.append(data[x])
+            else:
+                same.sort(key=lambda z: find_att(z))
+                y = 0
+                for y in range(0, len(same)):
+                    if same[y]['version'] != same[y+1]['version']:
+                        final_match.append(same[y])
+                same = []
+                same.append(mid_match[x])
+        else:
+            same.sort(key=lambda z: find_att(z))
+            mid_match.append(same[-1])
+        
         return final_match
 
     @staticmethod
