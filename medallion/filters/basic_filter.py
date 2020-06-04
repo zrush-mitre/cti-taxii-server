@@ -47,7 +47,6 @@ class BasicFilter(object):
         self.filter_args = filter_args
 
     def sort_and_paginate(self, data, limit, manifest):
-        temp = None
         next_save = {}
         headers = {}
         new = []
@@ -229,4 +228,3 @@ class BasicFilter(object):
         final_match, save_next, headers = self.sort_and_paginate(filtered_by_version, limit, manifest_info)
 
         return final_match, save_next, headers
-
