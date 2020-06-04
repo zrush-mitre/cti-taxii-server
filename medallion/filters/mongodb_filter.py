@@ -15,19 +15,15 @@ class MongoDBFilter(BasicFilter):
     def _query_parameters(self, allowed):
         parameters = self.basic_filter
         if self.filter_args:
-            
-            #proposed filters
-            ais_filters = ["source_ref", "target_ref", "relationship_type", "sighting_of_ref",
-                           "object_marking_refs", "tlp", "external_id", "source_name", 
-                           "created_by_ref", "confidence", "sectors", "labels", "object_refs",
-                           "value"]
+
+            # proposed filters
             tlps = {
-                "white": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9", 
-                "green": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da", 
-                "amber": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82", 
+                "white": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9",
+                "green": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
+                "amber": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "red": "marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed"
             }
-            
+
             if "ais" in allowed:
                 match_source_ref = self.filter_args.get("match[source_ref]")
                 if match_source_ref:
@@ -69,10 +65,10 @@ class MongoDBFilter(BasicFilter):
                         if t in tlps:
                             tlp_ids_.append(tlps[t])
                         else:
-                            #what do we do here? ignore or throw an error?
+                            # what do we do here? ignore or throw an error?
                             pass
                     if len(tlp_ids_) == 1:
-                        #this is a hacky way of doing it, but it works
+                        # this is a hacky way of doing it, but it works
                         parameters["_manifest.id"] = {"$eq": tlp_ids_[0]}
                     else:
                         parameters["_manifest.id"] = {"$in": tlp_ids_}
@@ -80,18 +76,18 @@ class MongoDBFilter(BasicFilter):
                 if match_external_id:
                     external_ids_ = match_external_id.split(",")
                     if len(external_ids_) == 1:
-                        parameters["external_references"] = { "$elemMatch": {"external_id": {"$eq": external_ids_[0]}}}
+                        parameters["external_references"] = {"$elemMatch": {"external_id": {"$eq": external_ids_[0]}}}
                     else:
-                        parameters["external_references"] = { "$elemMatch": {"external_id": {"$in": external_ids_}}}
+                        parameters["external_references"] = {"$elemMatch": {"external_id": {"$in": external_ids_}}}
                 match_external_id = self.filter_args.get("match[external_id]")
-                #gotta figure out how to do multiple queries on the same attribute
+                # gotta figure out how to do multiple queries on the same attribute
                 match_source_name = self.filter_args.get("match[source_name]")
                 if match_source_name:
                     source_names_ = match_source_name.split(",")
                     if len(source_names_) == 1:
-                        parameters["external_references"] = { "$elemMatch": {"source_name": {"$eq": source_names_[0]}}}
+                        parameters["external_references"] = {"$elemMatch": {"source_name": {"$eq": source_names_[0]}}}
                     else:
-                        parameters["external_references"] = { "$elemMatch": {"external_id": {"$in": source_names_}}}
+                        parameters["external_references"] = {"$elemMatch": {"external_id": {"$in": source_names_}}}
                 match_created_by_ref = self.filter_args.get("match[created_by_ref]")
                 if match_created_by_ref:
                     created_by_refs_ = match_created_by_ref.split(",")
@@ -126,7 +122,7 @@ class MongoDBFilter(BasicFilter):
                         parameters["value"] = {"$eq": values_[0]}
                     else:
                         parameters["value"] = {"$in": values_}
-                #end of ais filters
+                # end of ais filters
 
             match_type = self.filter_args.get("match[type]")
             if match_type and "type" in allowed:

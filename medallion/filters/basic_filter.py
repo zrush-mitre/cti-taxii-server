@@ -200,9 +200,9 @@ class BasicFilter(object):
     @staticmethod
     def filter_by_anything(data, filter_, subject):
         tlps = {
-            "white": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9", 
-            "green": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da", 
-            "amber": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82", 
+            "white": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9",
+            "green": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
+            "amber": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
             "red": "marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed"
         }
         filter_ = filter_.split(",")
@@ -231,14 +231,13 @@ class BasicFilter(object):
         return match_objects
 
     def process_filter(self, data, allowed=(), manifest_info=(), limit=None):
-        #ais filters
-        ais_filters = ["source_ref", "target_ref", "relationship_type", 
+        # ais filters
+        ais_filters = ["source_ref", "target_ref", "relationship_type",
                        "sighting_of_ref", "object_marking_refs", "tlp",
-                       "external_id", "source_name", "created_by_ref", 
+                       "external_id", "source_name", "created_by_ref",
                        "confidence", "sectors", "labels", "object_refs",
                        "value"]
-        filtered_by_source_ref = []
-        
+
         filtered_by_type = []
         filtered_by_id = []
         filtered_by_spec_version = []
@@ -255,7 +254,7 @@ class BasicFilter(object):
                 match_ais = self.filter_args.get("match[" + fil + "]")
                 if match_ais is not None:
                     filtered_by_ais_filter = self.filter_by_anything(filtered_by_ais_filter, match_ais, fil)
-        
+
         # match for type and id filters first
         match_type = self.filter_args.get("match[type]")
         if match_type and "type" in allowed:
