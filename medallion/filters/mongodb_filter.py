@@ -15,6 +15,119 @@ class MongoDBFilter(BasicFilter):
     def _query_parameters(self, allowed):
         parameters = self.basic_filter
         if self.filter_args:
+            
+            #proposed filters
+            ais_filters = ["source_ref", "target_ref", "relationship_type", "sighting_of_ref",
+                           "object_marking_refs", "tlp", "external_id", "source_name", 
+                           "created_by_ref", "confidence", "sectors", "labels", "object_refs",
+                           "value"]
+            tlps = {
+                "white": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9", 
+                "green": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da", 
+                "amber": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82", 
+                "red": "marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed"
+            }
+            
+            if "ais" in allowed:
+                match_source_ref = self.filter_args.get("match[source_ref]")
+                if match_source_ref:
+                    source_refs_ = match_source_ref.split(",")
+                    if len(source_refs_) == 1:
+                        parameters["source_ref"] = {"$eq": source_refs_[0]}
+                    else:
+                        parameters["source_ref"] = {"$in": source_refs_}
+                match_target_ref = self.filter_args.get("match[target_ref]")
+                if match_target_ref:
+                    target_refs_ = match_target_ref.split(",")
+                    if len(target_refs_) == 1:
+                        parameters["target_ref"] = {"$eq": target_refs_[0]}
+                    else:
+                        parameters["target_ref"] = {"$in": target_refs_}
+                match_relationship_type = self.filter_args.get("match[relationship_type]")
+                if match_relationship_type:
+                    relationship_types_ = match_relationship_type.split(",")
+                    if len(relationship_types_) == 1:
+                        parameters["relationship_type"] = {"$eq": relationship_types_[0]}
+                    else:
+                        parameters["relationship_type"] = {"$in": relationship_types_}
+                match_sighting_of_refs = self.filter_args.get("match[sighting_of_ref]")
+                if match_sighting_of_refs:
+                    sighting_of_refs_ = match_sighting_of_refs.split(",")
+                    if len(sighting_of_refs_) == 1:
+                        parameters["sighting_of_ref"] = {"$eq": sighting_of_refs_[0]}
+                    else:
+                        parameters["sighting_of_ref"] = {"$in": sighting_of_refs_}
+                match_object_marking_refs = self.filter_args.get("match[object_marking_refs]")
+                if match_object_marking_refs:
+                    object_marking_refs_ = match_object_marking_refs.split(",")
+                    parameters["object_marking_refs"] = {"$in": object_marking_refs_}
+                match_tlp = self.filter_args.get("match[tlp]")
+                if match_tlp:
+                    tlp_ids_ = []
+                    tlps_ = match_tlp.split(",")
+                    for t in tlps_:
+                        if t in tlps:
+                            tlp_ids_.append(tlps[t])
+                        else:
+                            #what do we do here? ignore or throw an error?
+                            pass
+                    if len(tlp_ids_) == 1:
+                        #this is a hacky way of doing it, but it works
+                        parameters["_manifest.id"] = {"$eq": tlp_ids_[0]}
+                    else:
+                        parameters["_manifest.id"] = {"$in": tlp_ids_}
+                match_external_id = self.filter_args.get("match[external_id]")
+                if match_external_id:
+                    external_ids_ = match_external_id.split(",")
+                    if len(external_ids_) == 1:
+                        parameters["external_references"] = { "$elemMatch": {"external_id": {"$eq": external_ids_[0]}}}
+                    else:
+                        parameters["external_references"] = { "$elemMatch": {"external_id": {"$in": external_ids_}}}
+                match_external_id = self.filter_args.get("match[external_id]")
+                #gotta figure out how to do multiple queries on the same attribute
+                match_source_name = self.filter_args.get("match[source_name]")
+                if match_source_name:
+                    source_names_ = match_source_name.split(",")
+                    if len(source_names_) == 1:
+                        parameters["external_references"] = { "$elemMatch": {"source_name": {"$eq": source_names_[0]}}}
+                    else:
+                        parameters["external_references"] = { "$elemMatch": {"external_id": {"$in": source_names_}}}
+                match_created_by_ref = self.filter_args.get("match[created_by_ref]")
+                if match_created_by_ref:
+                    created_by_refs_ = match_created_by_ref.split(",")
+                    if len(created_by_refs_) == 1:
+                        parameters["created_by_ref"] = {"$eq": created_by_refs_[0]}
+                    else:
+                        parameters["created_by_ref"] = {"$in": created_by_refs_}
+                match_confidence = self.filter_args.get("match[confidence]")
+                if match_confidence:
+                    confidences_ = match_confidence.split(",")
+                    if len(confidences_) == 1:
+                        parameters["confidence"] = {"$eq": int(confidences_[0])}
+                    else:
+                        int_confidences_ = [int(x) for x in confidences_]
+                        parameters["confidence"] = {"$in": int_confidences_}
+                match_sectors = self.filter_args.get("match[sectors]")
+                if match_sectors:
+                    sectors_ = match_sectors.split(",")
+                    parameters["sectors"] = {"$in": sectors_}
+                match_labels = self.filter_args.get("match[labels]")
+                if match_labels:
+                    labels_ = match_labels.split(",")
+                    parameters["labels"] = {"$in": labels_}
+                match_object_refs = self.filter_args.get("match[object_refs]")
+                if match_object_refs:
+                    object_refs_ = match_object_refs.split(",")
+                    parameters["object_refs"] = {"$in": object_refs_}
+                match_value = self.filter_args.get("match[value]")
+                if match_value:
+                    values_ = match_value.split(",")
+                    if len(values_) == 1:
+                        parameters["value"] = {"$eq": values_[0]}
+                    else:
+                        parameters["value"] = {"$in": values_}
+                #end of ais filters
+
             match_type = self.filter_args.get("match[type]")
             if match_type and "type" in allowed:
                 types_ = match_type.split(",")

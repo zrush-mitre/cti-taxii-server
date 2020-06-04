@@ -197,7 +197,6 @@ class BasicFilter(object):
                     match_objects.append(obj)
         return match_objects
 
-<<<<<<< HEAD
     @staticmethod
     def filter_by_anything(data, filter_, subject):
         tlps = {
