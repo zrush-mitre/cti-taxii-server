@@ -77,7 +77,7 @@ def test_get_collections(backend):
     collections_metadata = sorted(collections_metadata["collections"], key=lambda x: x["id"])
     collection_ids = [cm["id"] for cm in collections_metadata]
 
-    assert len(collection_ids) == 5
+    assert len(collection_ids) == 6
     assert "52892447-4d7e-4f70-b94d-d7f22742ff63" in collection_ids
     assert "91a7b528-80eb-42ed-a74d-c6fbd5a26116" in collection_ids
     assert "64993447-4d7e-4f70-b94d-d7f33742ee63" in collection_ids
@@ -1433,3 +1433,289 @@ def test_default_backend_no_backend_section(no_backend_section):
     assert no_backend_section.app.medallion_backend.data == {}
 
 # test collections with different can_read and can_write values
+
+#testing ais filters
+def test_get_objects_source_ref(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[source_ref]=indicator--cd981c25-8042-4166-8945-51178443bdxx",
+            headers=backend.headers)
+    
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "relationship--8220aea4-415d-482f-9b7d-bf9a9bdb3542"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[source_ref]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_target_ref(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[target_ref]=malware--c0931cc6-c75e-47e5-9036-78fabc95d4ec",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "relationship--8220aea4-415d-482f-9b7d-bf9a9bdb3542"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[target_ref]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_relationship_type(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[relationship_type]=indicates",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "relationship--8220aea4-415d-482f-9b7d-bf9a9bdb3542"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[relationship_type]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_sighting_of_ref(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[sighting_of_ref]=malware--c0931cc6-c75e-47e5-9036-78fabc95d4ec",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "sighting--ee20065d-2555-424f-ad9e-0f8428623c75"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[sighting_of_ref]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_object_marking_refs(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[object_marking_refs]=marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[object_marking_refs]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_tlp(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[tlp]=green",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[tlp]=red",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_external_id(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[external_id]=CVE-2016-1234",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[external_id]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_source_name(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[source_name]=cve",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[source_name]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_created_by_ref(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[created_by_ref]=identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "sighting--ee20065d-2555-424f-ad9e-0f8428623c75"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[created_by_ref]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_confidence(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[confidence]=50",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[confidence]=100",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_sectors(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[sectors]=retail",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[sectors]=aerospace",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_labels(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[labels]=heartbleed",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[labels]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_object_refs(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[object_refs]=relationship--8220aea4-415d-482f-9b7d-bf9a9bdb3542",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[object_refs]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_opinion(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[opinion]=neutral",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "opinion--cd981c25-8042-4166-8945-51178443bdxx"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[opinion]=agree",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+
+def test_get_objects_value(backend):
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[value]=100.100.100.100",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "ipv4-addr--ff26c055-6336-5bc5-b98d-13d6226742dd"
+
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[value]=foo",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs

@@ -57,6 +57,7 @@ class MongoDBFilter(BasicFilter):
                 if match_object_marking_refs:
                     object_marking_refs_ = match_object_marking_refs.split(",")
                     parameters["object_marking_refs"] = {"$in": object_marking_refs_}
+                #this needs to check object_marking_refs, not id
                 match_tlp = self.filter_args.get("match[tlp]")
                 if match_tlp:
                     tlp_ids_ = []
@@ -65,29 +66,22 @@ class MongoDBFilter(BasicFilter):
                         if t in tlps:
                             tlp_ids_.append(tlps[t])
                         else:
-                            # what do we do here? ignore or throw an error?
-                            pass
-                    if len(tlp_ids_) == 1:
-                        # this is a hacky way of doing it, but it works
-                        parameters["_manifest.id"] = {"$eq": tlp_ids_[0]}
-                    else:
-                        parameters["_manifest.id"] = {"$in": tlp_ids_}
+                            raise ProcessingError("The server did not understand the request or filter parameters: 'tlp' value not a valid tlp marking", 400)
+                    parameters["object_marking_refs"] = {"$in": tlp_ids_}
                 match_external_id = self.filter_args.get("match[external_id]")
                 if match_external_id:
                     external_ids_ = match_external_id.split(",")
                     if len(external_ids_) == 1:
-                        parameters["external_references"] = {"$elemMatch": {"external_id": {"$eq": external_ids_[0]}}}
+                        parameters["external_references.external_id"] = {"$eq": external_ids_[0]}
                     else:
-                        parameters["external_references"] = {"$elemMatch": {"external_id": {"$in": external_ids_}}}
-                match_external_id = self.filter_args.get("match[external_id]")
-                # gotta figure out how to do multiple queries on the same attribute
+                        parameters["external_references.external_id"] = {"$in": external_ids_}
                 match_source_name = self.filter_args.get("match[source_name]")
                 if match_source_name:
                     source_names_ = match_source_name.split(",")
                     if len(source_names_) == 1:
-                        parameters["external_references"] = {"$elemMatch": {"source_name": {"$eq": source_names_[0]}}}
+                        parameters["external_references.source_name"] = {"$eq": source_names_[0]}
                     else:
-                        parameters["external_references"] = {"$elemMatch": {"external_id": {"$in": source_names_}}}
+                        parameters["external_references.source_name"] = {"$in": source_names_}
                 match_created_by_ref = self.filter_args.get("match[created_by_ref]")
                 if match_created_by_ref:
                     created_by_refs_ = match_created_by_ref.split(",")
@@ -115,6 +109,13 @@ class MongoDBFilter(BasicFilter):
                 if match_object_refs:
                     object_refs_ = match_object_refs.split(",")
                     parameters["object_refs"] = {"$in": object_refs_}
+                match_opinion = self.filter_args.get("match[opinion]")
+                if match_opinion:
+                    opinions_ = match_opinion.split(",")
+                    if len(opinions_) == 1:
+                        parameters["opinion"] = {"$eq": opinions_[0]}
+                    else:
+                        parameters["opinion"] = {"$in": opinions_}
                 match_value = self.filter_args.get("match[value]")
                 if match_value:
                     values_ = match_value.split(",")

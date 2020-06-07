@@ -148,7 +148,105 @@ def reset_db(url="mongodb://root:example@localhost:27017/"):
         ],
     })
 
+    api_root_db["collections"].insert_one({
+        "id": "61c75ff3-de53-48dd-b38a-332544929d41",
+        "title": "This data collection is for testing ais filters",
+        "can_read": True,
+        "can_write": True,
+        "media_types": [
+            "application/stix+json;version=2.1",
+        ],
+    })
+
     api_root_db["objects"].insert_many([
+        {
+            "created": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),
+            "modified": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),
+            "id": "relationship--8220aea4-415d-482f-9b7d-bf9a9bdb3542",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--cd981c25-8042-4166-8945-51178443bdxx",
+            "spec_version": "2.1",
+            "target_ref": "malware--c0931cc6-c75e-47e5-9036-78fabc95d4ec",
+            "type": "relationship",
+            "_collection_id": "61c75ff3-de53-48dd-b38a-332544929d41",
+            "_manifest": {
+                "date_added": datetime_to_float(string_to_datetime("2020-06-08T12:40:00.000Z")),
+                "id": "relationship--8220aea4-415d-482f-9b7d-bf9a9bdb3542",
+                "media_type": "application/stix+json;version=2.1",
+                "version": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),
+            },
+        },
+        {
+            "created": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),
+            "id": "opinion--cd981c25-8042-4166-8945-51178443bdxx",
+            "object_marking_refs": ["marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"],
+            "confidence": 50,
+            "modified": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),
+            "spec_version": "2.1",
+            "type": "opinion",
+            "object_refs": ["relationship--8220aea4-415d-482f-9b7d-bf9a9bdb3542"],
+            "external_references": [
+                {
+                    "source_name": "cve",
+                    "external_id": "CVE-2016-1234"
+                }
+            ],
+            "labels": ["has-logo", "heartbleed"],
+            "opinion": "neutral",
+            "_collection_id": "61c75ff3-de53-48dd-b38a-332544929d41",
+            "_manifest": {
+                "date_added": datetime_to_float(string_to_datetime("2020-06-08T12:40:00.000Z")),
+                "id": "opinion--cd981c25-8042-4166-8945-51178443bdxx",
+                "media_type": "application/stix+json;version=2.1",
+                "version": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),
+            },
+        },
+        {
+            "type": "sighting",
+            "spec_version": "2.1",
+            "id": "sighting--ee20065d-2555-424f-ad9e-0f8428623c75",
+            "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
+            "created": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            "modified": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            "sighting_of_ref": "malware--c0931cc6-c75e-47e5-9036-78fabc95d4ec",
+            "_collection_id": "61c75ff3-de53-48dd-b38a-332544929d41",
+            "_manifest": {
+                "date_added": datetime_to_float(string_to_datetime("2020-06-08T12:40:00.000Z")),
+                "id": "sighting--ee20065d-2555-424f-ad9e-0f8428623c75",
+                "media_type": "application/stix+json;version=2.1",
+                "version": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            },
+        },
+        {
+            "type": "identity",
+            "spec_version": "2.1",
+            "id": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
+            "created": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            "modified": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            "sectors": "retail",
+            "_collection_id": "61c75ff3-de53-48dd-b38a-332544929d41",
+            "_manifest": {
+                "date_added": datetime_to_float(string_to_datetime("2020-06-08T12:40:00.000Z")),
+                "id": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
+                "media_type": "application/stix+json;version=2.1",
+                "version": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            },
+        },
+        {
+            "type": "ipv4-addr",
+            "spec_version": "2.1",
+            "created": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            "modified": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            "id": "ipv4-addr--ff26c055-6336-5bc5-b98d-13d6226742dd",
+            "value": "100.100.100.100",
+            "_collection_id": "61c75ff3-de53-48dd-b38a-332544929d41",
+            "_manifest": {
+                "date_added": datetime_to_float(string_to_datetime("2020-06-08T12:40:00.000Z")),
+                "id": "ipv4-addr--ff26c055-6336-5bc5-b98d-13d6226742dd",
+                "media_type": "application/stix+json;version=2.1",
+                "version": datetime_to_float(string_to_datetime("2016-04-06T20:08:31.000Z")),
+            },
+        },
         {
             "created": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),
             "modified": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000Z")),

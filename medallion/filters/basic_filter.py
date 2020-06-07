@@ -198,7 +198,7 @@ class BasicFilter(object):
         return match_objects
 
     @staticmethod
-    def filter_by_anything(data, filter_, subject):
+    def filter_by_ais(data, filter_, subject):
         tlps = {
             "white": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9",
             "green": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
@@ -220,7 +220,9 @@ class BasicFilter(object):
                     if any(int(f) == obj[subject] for f in filter_):
                         match_objects.append(obj)
             elif subject == "tlp" and "object_marking_refs" in obj:
-                if any(tlps[f] in obj["object_marking_refs"] for f in filter_):
+                if any(f not in tlps for f in filter_):
+                    raise ProcessingError("The server did not understand the request or filter parameters: 'tlp' value not a valid tlp marking", 400)
+                elif any(tlps[f] in obj["object_marking_refs"] for f in filter_):
                     match_objects.append(obj)
             elif "external_references" in obj:
                 for e in obj["external_references"]:
@@ -236,7 +238,7 @@ class BasicFilter(object):
                        "sighting_of_ref", "object_marking_refs", "tlp",
                        "external_id", "source_name", "created_by_ref",
                        "confidence", "sectors", "labels", "object_refs",
-                       "value"]
+                       "opinion", "value"]
 
         filtered_by_type = []
         filtered_by_id = []
@@ -253,7 +255,7 @@ class BasicFilter(object):
             for fil in ais_filters:
                 match_ais = self.filter_args.get("match[" + fil + "]")
                 if match_ais is not None:
-                    filtered_by_ais_filter = self.filter_by_anything(filtered_by_ais_filter, match_ais, fil)
+                    filtered_by_ais_filter = self.filter_by_ais(filtered_by_ais_filter, match_ais, fil)
 
         # match for type and id filters first
         match_type = self.filter_args.get("match[type]")
