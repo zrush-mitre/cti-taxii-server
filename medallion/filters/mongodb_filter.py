@@ -1,6 +1,7 @@
 import pymongo
 
 from ..common import datetime_to_float, string_to_datetime
+from ..exceptions import ProcessingError
 from .basic_filter import BasicFilter
 
 
