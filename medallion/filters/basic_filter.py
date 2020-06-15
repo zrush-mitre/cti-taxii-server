@@ -3,6 +3,7 @@ import copy
 import operator
 
 from ..common import determine_spec_version, find_att, string_to_datetime
+from ..exceptions import ProcessingError
 
 
 def check_for_dupes(final_match, final_track, res):
