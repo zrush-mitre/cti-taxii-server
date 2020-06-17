@@ -366,6 +366,17 @@
 			"modified": "2016-04-06T20:08:31.000Z",
 			"id": "ipv4-addr--ff26c055-6336-5bc5-b98d-13d6226742dd",
 			"value": "100.100.100.100"
+		    },
+		    {
+			"type": "indicator",
+			"id": "indicator--26e949da-3714-403d-bd8c-f3f8ba426b97",
+			"created": "2016-11-02T12:30:59.000Z",
+			"modified": "2016-11-02T12:30:59.000Z",
+			"pattern": "[url:value = 'http://x4z9arb.cn/4712']",
+			"pattern_type": "stix",
+			"spec_version": "2.1",
+			"valid_from": "2016-11-03T12:30:59.000Z",
+			"valid_until": "2020-06-19T20:20:20Z"
 		    }
 		],
                 "manifest": [
@@ -398,6 +409,12 @@
                         "id": "ipv4-addr--ff26c055-6336-5bc5-b98d-13d6226742dd",
                         "media_type": "application/stix+json;version=2.1",
                         "version": "2016-04-06T20:08:31.000Z"
+                    },
+		    {
+                        "date_added": "2020-06-08T12:40:00.000Z",
+                        "id": "indicator--26e949da-3714-403d-bd8c-f3f8ba426b97",
+                        "media_type": "application/stix+json;version=2.1",
+                        "version": "2016-11-02T12:30:59.000Z"
                     }
 		]
             }

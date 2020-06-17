@@ -225,6 +225,13 @@ class BasicFilter(object):
                     raise ProcessingError("The server did not understand the request or filter parameters: 'tlp' value not a valid tlp marking", 400)
                 elif any(tlps[f] in obj["object_marking_refs"] for f in filter_):
                     match_objects.append(obj)
+            elif subject == "valid_on_after" and obj['type'] == 'indicator':
+                if 'revoked' not in obj or obj['revoked'] == False:
+                    for ft in filter_:
+                        f = string_to_datetime(ft)
+                        if f >= string_to_datetime(obj['valid_from']):
+                            if 'valid_until' not in obj or f <= string_to_datetime(obj['valid_until']):
+                                match_objects.append(obj)
             elif "external_references" in obj:
                 for e in obj["external_references"]:
                     if subject in e:
@@ -239,7 +246,7 @@ class BasicFilter(object):
                        "sighting_of_ref", "object_marking_refs", "tlp",
                        "external_id", "source_name", "created_by_ref",
                        "confidence", "sectors", "labels", "object_refs",
-                       "opinion", "value"]
+                       "opinion", "value", "valid_on_after"]
 
         filtered_by_type = []
         filtered_by_id = []

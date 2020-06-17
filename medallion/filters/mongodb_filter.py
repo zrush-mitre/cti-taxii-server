@@ -124,6 +124,14 @@ class MongoDBFilter(BasicFilter):
                         parameters["value"] = {"$eq": values_[0]}
                     else:
                         parameters["value"] = {"$in": values_}
+                match_valid_on_after = self.filter_args.get("match[valid_on_after]")
+                if match_valid_on_after:
+                    valid_on_after_ = match_valid_on_after.split(",")
+                    if len(valid_on_after_) == 1:
+                        parameters["valid_from"] = {"$lte": datetime_to_float(string_to_datetime(valid_on_after_[0]))}
+                        parameters["revoked"] = {"$exists": false}
+                    else:
+                        parameters["valid_from"] = {"$in": valid_on_after_}
                 # end of ais filters
 
             match_type = self.filter_args.get("match[type]")
