@@ -58,7 +58,6 @@ class MongoDBFilter(BasicFilter):
                 if match_object_marking_refs:
                     object_marking_refs_ = match_object_marking_refs.split(",")
                     parameters["object_marking_refs"] = {"$in": object_marking_refs_}
-                #this needs to check object_marking_refs, not id
                 match_tlp = self.filter_args.get("match[tlp]")
                 if match_tlp:
                     tlp_ids_ = []
@@ -128,10 +127,20 @@ class MongoDBFilter(BasicFilter):
                 if match_valid_on_after:
                     valid_on_after_ = match_valid_on_after.split(",")
                     if len(valid_on_after_) == 1:
-                        parameters["valid_from"] = {"$lte": datetime_to_float(string_to_datetime(valid_on_after_[0]))}
-                        parameters["revoked"] = {"$exists": false}
+                        date = datetime_to_float(string_to_datetime(valid_on_after_[0]))
+                        parameters["valid_from"] = {"$lte": date}
+                        or_revoked = {"$or": [{"revoked": {"$exists": False}}, {"revoked": {"$eq": False}}]}
+                        or_until = {"$or": [{"valid_until": {"$exists": False}}, {"valid_until": {"$gte":  date}}]}
+                        parameters["$and"] = [or_revoked, or_until]
                     else:
-                        parameters["valid_from"] = {"$in": valid_on_after_}
+                        parameters["$or"] = []
+                        for date in valid_on_after_:
+                            big_q = {}
+                            big_q["valid_from"] = {"$lte": datetime_to_float(string_to_datetime(date))}
+                            or_revoked = {"$or": [{"revoked": {"$exists": False}}, {"revoked": {"$eq": False}}]}
+                            or_until = {"$or": [{"valid_until": {"$exists": False}}, {"valid_until": {"$gte":  datetime_to_float(string_to_datetime(date))}}]}
+                            big_q["$and"] = [or_revoked, or_until]
+                            parameters["$or"].append(big_q)
                 # end of ais filters
 
             match_type = self.filter_args.get("match[type]")
