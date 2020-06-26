@@ -130,7 +130,7 @@ class MongoDBFilter(BasicFilter):
                         date = datetime_to_float(string_to_datetime(valid_on_after_[0]))
                         parameters["valid_from"] = {"$lte": date}
                         or_revoked = {"$or": [{"revoked": {"$exists": False}}, {"revoked": {"$eq": False}}]}
-                        or_until = {"$or": [{"valid_until": {"$exists": False}}, {"valid_until": {"$gte":  date}}]}
+                        or_until = {"$or": [{"valid_until": {"$exists": False}}, {"valid_until": {"$gt":  date}}]}
                         parameters["$and"] = [or_revoked, or_until]
                     else:
                         parameters["$or"] = []
@@ -138,7 +138,7 @@ class MongoDBFilter(BasicFilter):
                             big_q = {}
                             big_q["valid_from"] = {"$lte": datetime_to_float(string_to_datetime(date))}
                             or_revoked = {"$or": [{"revoked": {"$exists": False}}, {"revoked": {"$eq": False}}]}
-                            or_until = {"$or": [{"valid_until": {"$exists": False}}, {"valid_until": {"$gte":  datetime_to_float(string_to_datetime(date))}}]}
+                            or_until = {"$or": [{"valid_until": {"$exists": False}}, {"valid_until": {"$gt":  datetime_to_float(string_to_datetime(date))}}]}
                             big_q["$and"] = [or_revoked, or_until]
                             parameters["$or"].append(big_q)
                 # end of ais filters
