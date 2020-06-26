@@ -230,7 +230,7 @@ class BasicFilter(object):
                     for ft in filter_:
                         f = string_to_datetime(ft)
                         if f >= string_to_datetime(obj['valid_from']):
-                            if 'valid_until' not in obj or f <= string_to_datetime(obj['valid_until']):
+                            if 'valid_until' not in obj or f < string_to_datetime(obj['valid_until']):
                                 match_objects.append(obj)
             elif "external_references" in obj:
                 for e in obj["external_references"]:
