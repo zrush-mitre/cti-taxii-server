@@ -1720,7 +1720,7 @@ def test_get_objects_value(backend):
     objs = r.json
     assert not objs
 
-def test_get_objects_value(backend):
+def test_get_objects_valid_on_after(backend):
     r = backend.client.get(test.AIS_OBJECTS_EP + "?match[valid_on_after]=2017-11-03T12:30:59.000Z",
             headers=backend.headers)
 
@@ -1732,6 +1732,44 @@ def test_get_objects_value(backend):
     assert objs["objects"][0]['id'] == "indicator--26e949da-3714-403d-bd8c-f3f8ba426b97"
 
     r = backend.client.get(test.AIS_OBJECTS_EP + "?match[valid_on_after]=2015-11-03T12:30:59.000Z",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+    
+    # valid_from is inclusive
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[valid_on_after]=2016-11-03T12:30:59.000Z",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert objs["more"] is False
+    assert len(objs["objects"]) == 1
+    assert objs["objects"][0]['id'] == "indicator--26e949da-3714-403d-bd8c-f3f8ba426b97"
+
+    # valid_until is exclusive
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[valid_on_after]=2020-06-19T20:20:20Z",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+    
+    # .001 seconds before valid_from
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[valid_on_after]=2016-11-03T12:30:58.999Z",
+            headers=backend.headers)
+
+    assert r.status_code == 200
+    assert r.content_type == MEDIA_TYPE_TAXII_V21
+    objs = r.json
+    assert not objs
+    
+    # .001 seconds after valid_until
+    r = backend.client.get(test.AIS_OBJECTS_EP + "?match[valid_on_after]=2020-06-19T20:20:20.001Z",
             headers=backend.headers)
 
     assert r.status_code == 200
