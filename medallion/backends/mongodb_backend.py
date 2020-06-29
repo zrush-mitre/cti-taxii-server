@@ -233,6 +233,10 @@ class MongoBackend(Backend):
                 obj["modified"] = datetime_to_string_stix(float_to_datetime(obj["modified"]))
             if "created" in obj:
                 obj["created"] = datetime_to_string_stix(float_to_datetime(obj["created"]))
+            if "valid_from" in obj:
+                obj["valid_from"] = datetime_to_string_stix(float_to_datetime(obj["valid_from"]))
+            if "valid_until" in obj:
+                obj["valid_until"] = datetime_to_string_stix(float_to_datetime(obj["valid_until"]))
 
         manifest_resource = self._get_object_manifest(api_root, collection_id, filter_args, allowed_filters, limit, True)
         headers = get_custom_headers(manifest_resource)
