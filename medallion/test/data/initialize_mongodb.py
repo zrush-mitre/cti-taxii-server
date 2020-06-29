@@ -294,7 +294,7 @@ def reset_db(url="mongodb://root:example@localhost:27017/"):
             "pattern_type": "stix",
             "spec_version": "2.1",
             "type": "indicator",
-            "valid_from": "2014-05-08T09:00:00.000000Z",
+            "valid_from": datetime_to_float(string_to_datetime("2014-05-08T09:00:00.000000Z")),
             "_collection_id": "91a7b528-80eb-42ed-a74d-c6fbd5a26116",
             "_manifest": {
                 "date_added": datetime_to_float(string_to_datetime("2016-11-01T03:04:05.000000Z")),
@@ -316,7 +316,7 @@ def reset_db(url="mongodb://root:example@localhost:27017/"):
             "pattern_type": "stix",
             "spec_version": "2.1",
             "type": "indicator",
-            "valid_from": "2017-01-27T13:49:53.935382Z",
+            "valid_from": datetime_to_float(string_to_datetime("2017-01-27T13:49:53.935382Z")),
             "_collection_id": "91a7b528-80eb-42ed-a74d-c6fbd5a26116",
             "_manifest": {
                 "date_added": datetime_to_float(string_to_datetime("2016-11-03T12:30:59.001000Z")),
@@ -338,7 +338,7 @@ def reset_db(url="mongodb://root:example@localhost:27017/"):
             "pattern_type": "stix",
             "spec_version": "2.1",
             "type": "indicator",
-            "valid_from": "2017-01-27T13:49:53.935382Z",
+            "valid_from": datetime_to_float(string_to_datetime("2017-01-27T13:49:53.935382Z")),
             "_collection_id": "91a7b528-80eb-42ed-a74d-c6fbd5a26116",
             "_manifest": {
                 "date_added": datetime_to_float(string_to_datetime("2016-12-27T13:49:59.000000Z")),
@@ -360,7 +360,7 @@ def reset_db(url="mongodb://root:example@localhost:27017/"):
             "pattern_type": "stix",
             "spec_version": "2.1",
             "type": "indicator",
-            "valid_from": "2016-11-03T12:30:59.000Z",
+            "valid_from": datetime_to_float(string_to_datetime("2016-11-03T12:30:59.000Z")),
             "_collection_id": "91a7b528-80eb-42ed-a74d-c6fbd5a26116",
             "_manifest": {
                 "date_added": datetime_to_float(string_to_datetime("2017-12-31T13:49:53.935000Z")),
